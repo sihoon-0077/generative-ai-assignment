@@ -1,0 +1,40 @@
+==========================================================================
+PA1 - Fit ONE multivariate Gaussian to load_digits() and sample from it
+==========================================================================
+
+[1] Load + normalize + flatten
+    raw images shape          : (1797, 8, 8)   (8x8 per image)
+    raw pixel range           : [0.0, 16.0]  (0-16)
+    X shape after flatten     : (1797, 64)   -> each x is in R^64
+    X pixel range after /16   : [0.0000, 1.0000]  (0-1)
+    n samples / n classes     : 1797 / 10
+    flatten matches digits.data: True
+
+[2] MLE fit of a single multivariate Gaussian  N(mu, Sigma)
+    mu shape                  : (64,),  mu range [0.0000, 0.7556]
+    Sigma shape               : (64, 64)
+    Sigma symmetric           : True
+    eigenvalue range          : [0.000e+00, 6.989e-01]
+    numerical rank of Sigma   : 61 / 64   -> SINGULAR
+    pixels with zero variance : 3  (always 0 in every training image)
+    => Cholesky is impossible; we use the eigendecomposition instead.
+
+[3] Sampler check   x = mu + A z,  z ~ N(0, I)
+    ||A A^T - Sigma|| / ||Sigma||                 : 1.850e-15
+    100000 samples -> rel. error of mean      : 1.468e-03
+    100000 samples -> rel. error of covariance: 1.175e-02
+    => the empirical moments converge to (mu, Sigma): the sampler is correct.
+
+[4] Generated 25 new samples (>= 20 required), each reshaped to 8x8
+    generated value range     : [-0.7720, 1.5563]
+    fraction of pixels outside [0,1] : 26.438%
+    (the training data is bounded in [0,1] but a Gaussian has support on
+     all of R^64, so out-of-range pixels are expected - analysed in PA2.)
+
+[5] Figures written to C:\Users\kliou\OneDrive\바탕 화면\3-2공모전모음\생성형ai\pa1_single_gaussian\outputs
+    - pa1_real_vs_generated.png
+    - pa1_diagnostics.png
+
+==========================================================================
+ALL CHECKS PASSED
+==========================================================================

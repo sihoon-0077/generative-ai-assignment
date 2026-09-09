@@ -1,0 +1,82 @@
+==============================================================================
+PA2 - class-conditional Gaussians  +  pixel-range analysis
+==============================================================================
+
+data: X (1797, 64), values in [0.0, 1.0], 10 classes
+
+------------------------------------------------------------------------------
+PART A.1  Fit p(x | y = c) for c = 0..9   (MLE per class)
+------------------------------------------------------------------------------
+ c   N_c   prior  rank(Sig_c)   tr(Sig_c)
+ 0   178  0.0991        48/64      1.5482
+ 1   182  0.1013        51/64      3.6744
+ 2   177  0.0985        54/64      2.9344
+ 3   183  0.1018        54/64      2.4751
+ 4   181  0.1007        53/64      2.8761
+ 5   182  0.1013        51/64      2.9585
+ 6   181  0.1007        48/64      2.0035
+ 7   179  0.0996        49/64      2.8701
+ 8   174  0.0968        52/64      2.8952
+ 9   180  0.1002        54/64      2.9442
+
+Law of total covariance:  Sigma_total = E_c[Sigma_c] + Cov_c[mu_c]
+    identity check ||lhs-rhs||/||rhs||     : 4.171e-16   (exact)
+    trace(Sigma_total)                     : 4.6933
+    trace(within-class  E_c[Sigma_c])      : 2.7189  (57.9%)
+    trace(between-class Cov_c[mu_c])       : 1.9744  (42.1%)
+    => 42.1% of the single Gaussian's variance is variation
+       BETWEEN digit classes. Conditioning removes exactly that part.
+
+------------------------------------------------------------------------------
+PART A.2  Quality comparison  (three independent metrics)
+------------------------------------------------------------------------------
+
+[metric 1] held-out log-likelihood   (train 1078 / val 359 / test 360)
+    single Gaussian     : lambda* = 1.00e-06   test LL/sample =    11.080
+    class-conditional   : lambda* = 1.00e-05   test LL/sample =    68.463
+    improvement                                   =    57.383 nats/sample
+    (higher is better; both models regularised the same way and tuned on val)
+
+[metric 2] oracle classifier (logistic regression, real test acc = 96.7%)
+    conditional samples classified as the intended c : 98.8%
+    mean max class probability  - single Gaussian    : 0.625
+    mean max class probability  - class-conditional  : 0.907
+    mean predictive entropy     - single Gaussian    : 1.039 nats
+    mean predictive entropy     - class-conditional  : 0.360 nats
+    (low entropy / high confidence = the sample looks like ONE definite digit)
+
+[metric 3] mean L2 distance to the nearest REAL training image
+    real held-out images (reference floor) : 1.089
+    single Gaussian samples               : 1.814
+    class-conditional samples             : 1.344
+    (lower = lands closer to the real data manifold)
+
+------------------------------------------------------------------------------
+PART B  Pixel-value ranges: training images vs generated samples
+------------------------------------------------------------------------------
+
+source                                  min        max   % outside [0,1]
+training images                      0.0000     1.0000            0.00%
+generated - single Gaussian         -1.3625     2.5253           25.64%
+generated - class-conditional       -1.1519     2.0698           18.98%
+
+    below 0  - single      : 20.21%   |  max negative magnitude 1.363
+    above 1  - single      : 5.43%
+    below 0  - conditional : 13.72%   |  max negative magnitude 1.152
+    above 1  - conditional : 5.26%
+
+    Verification of the explanation (theory vs simulation):
+      single Gaussian    predicted 25.5939%  vs  observed 25.6379%
+      class-conditional  predicted 18.9695%  vs  observed 18.9786%
+      pixels with zero variance (always generated exactly at their
+      constant training value, so never out of range) : 3
+
+Figures written to C:\Users\kliou\OneDrive\바탕 화면\3-2공모전모음\생성형ai\pa2_conditional_gaussian\outputs
+    - pa2_conditional_samples.png
+    - pa2_single_vs_conditional.png
+    - pa2_class_means.png
+    - pa2_pixel_ranges.png
+
+==============================================================================
+ALL CHECKS PASSED
+==============================================================================
